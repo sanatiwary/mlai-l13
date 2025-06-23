@@ -9,6 +9,8 @@ sentimentDF["sentiment"] = sentimentDF["sentiment"].replace(
     {"positive" : 0, "negative" : 1, "neutral" : 2}
 )
 
+sentimentDF["selected_text"] = sentimentDF["selected_text"].fillna("")
+
 x = sentimentDF["selected_text"]
 y = sentimentDF["sentiment"]
 
@@ -39,6 +41,7 @@ def transform(data):
     corpus = []
 
     for i in data:
+        i = str(i)
         newi = re.sub("[^a-zA-Z]", " ", i)
         newi = newi.lower()
         newi = newi.split()
@@ -56,14 +59,14 @@ from sklearn.feature_extraction.text import CountVectorizer
 
 cv = CountVectorizer(ngram_range=(1, 2))
 xTrainNew = cv.fit_transform(xTrainCorpus)
-xTestNew = cv.fit_transform(xTestCorpus)
+xTestNew = cv.transform(xTestCorpus)
 print(xTrainNew.shape, xTestNew.shape)
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report
 
 rfc = RandomForestClassifier(n_estimators=100)
-rfc.fit(xTrainNew, xTestNew)
+rfc.fit(xTrainNew, yTrain)
 trainPred = rfc.predict(xTrainNew)
 testPred = rfc.predict(xTestNew)
 
@@ -80,7 +83,7 @@ def analyzeSentiment(text):
         print("neutral")
 
 ex0 = ["i love the new dress you're wearing"]
-ex1 = ["i don't like the color of your hair"]
+ex1 = ["i hate the color of your hair"]
 ex2 = ["i got a letter in the mail today"]
 
 analyzeSentiment(ex0)
